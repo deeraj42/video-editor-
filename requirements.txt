@@ -1,0 +1,223 @@
+# 🎬 ClipForge — AI Video Editor
+### Setup Guide (Personal Use)
+
+---
+
+## 📋 What You Will See When It Works
+
+When you run the server and open the browser, you'll see:
+- A dark themed web app called **ClipForge**
+- A drag-and-drop upload area for your raw video
+- Options for music genre, video effects, toggles for silence removal, etc.
+- A progress bar with live step-by-step status while your video processes
+- A download button at the end for your edited video
+
+---
+
+## 🛠️ Step 1 — Install FFmpeg (required first)
+
+FFmpeg is the video processing engine. It must be installed on your machine.
+
+### Windows:
+1. Go to https://ffmpeg.org/download.html → click **Windows builds** by BtbN
+2. Download `ffmpeg-master-latest-win64-gpl.zip`
+3. Extract it → you'll get a folder like `ffmpeg-master-latest-win64-gpl`
+4. Rename it to `ffmpeg` and put it at `C:\ffmpeg`
+5. Add to PATH:
+   - Search "environment variables" in Start
+   - Click "Environment Variables" → under System Variables find `Path` → Edit
+   - Add new entry: `C:\ffmpeg\bin`
+   - Click OK everywhere
+6. Open a NEW terminal and type: `ffmpeg -version`
+   - ✅ You should see version info like `ffmpeg version N-xxx`
+   - ❌ If "not recognized" → path was not set correctly, redo step 5
+
+### Mac:
+```bash
+brew install ffmpeg
+```
+(Install Homebrew first from https://brew.sh if needed)
+
+### Linux (Ubuntu/Debian):
+```bash
+sudo apt update && sudo apt install ffmpeg -y
+```
+
+---
+
+## 🐍 Step 2 — Install Python (if not installed)
+
+1. Go to https://python.org/downloads → Download Python 3.11 or 3.12
+2. During install, check **"Add Python to PATH"** ✅
+3. Verify: open terminal → `python --version`
+   - ✅ Should say `Python 3.11.x` or similar
+   - ❌ If not found → restart VS Code / terminal, or reinstall with PATH checked
+
+---
+
+## 📁 Step 3 — Open the Project in VS Code
+
+1. Open VS Code
+2. `File → Open Folder` → select the `video-editor` folder you extracted
+3. You should see these files in the Explorer panel:
+   ```
+   video-editor/
+   ├── app.py
+   ├── processor.py
+   ├── requirements.txt
+   ├── static/
+   │   └── index.html
+   ├── uploads/    (auto-created)
+   └── outputs/    (auto-created)
+   ```
+
+---
+
+## 📦 Step 4 — Install Python Libraries
+
+Open the VS Code Terminal (`Ctrl+`` ` or Terminal → New Terminal`) and run:
+
+```bash
+pip install -r requirements.txt
+```
+
+This installs:
+- `flask` — the web server
+- `flask-cors` — allows browser to talk to the server
+- `opencv-python` — video frame analysis (sharpness scoring)
+- `scenedetect[opencv]` — detects scene cuts and retakes
+- `numpy` — math for scoring
+- `requests` — downloads music tracks
+
+### ✅ What you should see:
+Lines like `Successfully installed flask-3.x scenedetect-0.6.x opencv-python-4.x ...`
+
+### ❌ If you see errors:
+| Error | Fix |
+|-------|-----|
+| `pip not found` | Use `pip3` instead of `pip` |
+| `Microsoft Visual C++ required` | Install VS Build Tools from https://visualstudio.microsoft.com/visual-cpp-build-tools/ |
+| `ERROR: Could not build wheels for opencv` | Run `pip install opencv-python-headless` instead |
+| Permission error | Add `--user` flag: `pip install -r requirements.txt --user` |
+
+---
+
+## ▶️ Step 5 — Run the App
+
+In the VS Code terminal:
+
+```bash
+python app.py
+```
+
+### ✅ What you should see:
+```
+✅  Video Editor running at  http://localhost:5000
+ * Serving Flask app 'app'
+ * Debug mode: on
+ * Running on http://127.0.0.1:5000
+```
+
+### ❌ If you see errors:
+| Error | Fix |
+|-------|-----|
+| `ModuleNotFoundError: No module named 'flask'` | Step 4 failed — run pip install again |
+| `Address already in use` | Port 5000 is busy — change `port=5000` to `port=5001` in app.py |
+| `python not found` | Use `python3 app.py` instead |
+
+---
+
+## 🌐 Step 6 — Open in Browser
+
+Once you see the server running, open your browser and go to:
+
+```
+http://localhost:5000
+```
+
+You should see the **ClipForge** app with the dark UI and upload zone.
+
+---
+
+## 🎬 Step 7 — Using the App
+
+1. **Drop your raw video** into the upload zone (or click to browse)
+2. **Choose options:**
+   - Music genre (ambient, upbeat, cinematic, etc.)
+   - Video effect (cinematic, warm, B&W, etc.)
+   - Toggle music on/off, best-shot selection, motion blur
+3. **Click "Start AI Editing"**
+4. Watch the live progress bar go through each step
+5. When done → click **Download Edited Video** 🎉
+
+---
+
+## 🎵 Free Music API (Optional Upgrade)
+
+The app uses free CC0 music from Pixabay by default.
+
+To get MORE music variety with genre search:
+1. Go to https://pixabay.com/api/docs/ → create free account → get API key
+2. In the app UI → click "Advanced settings" → paste your API key
+3. Now the app will search Pixabay's full music library by genre
+
+---
+
+## 🤔 Troubleshooting FAQ
+
+**Q: Video uploads but processing fails**
+- Open the terminal where `python app.py` is running
+- Look for red error text — it will say exactly what failed
+- Common cause: FFmpeg not in PATH (re-check Step 1)
+
+**Q: Processing finishes but download is empty**
+- The output file may have been corrupted mid-process
+- Try with a shorter video first to test
+
+**Q: Silence removal is too aggressive / not enough**
+- Go to Advanced Settings in the UI
+- Threshold slider: -40 dB removes more silence, -20 dB removes less
+
+**Q: App says "Scene detection error"**
+- scenedetect may not be installed correctly
+- Run: `pip install scenedetect[opencv] --upgrade`
+
+**Q: Port 5000 doesn't work on Mac**
+- Mac Monterey/Ventura uses port 5000 for AirPlay
+- Change to `port=5001` in `app.py` and open `localhost:5001`
+
+---
+
+## 🗂️ File Structure After Running
+
+```
+video-editor/
+├── uploads/          ← raw videos you upload (temp)
+├── outputs/
+│   ├── <job-id>/     ← intermediate clips per job
+│   └── <job-id>_final.mp4  ← finished video
+├── app.py
+├── processor.py
+├── requirements.txt
+└── static/index.html
+```
+
+You can delete old job folders inside `outputs/` to free up space.
+
+---
+
+## 💡 Suggested Next Features
+
+| Feature | Difficulty | What it needs |
+|---------|-----------|---------------|
+| Auto subtitles / captions | Medium | `openai-whisper` library |
+| Thumbnail generator | Easy | OpenCV screenshot at best frame |
+| Multiple video merge | Easy | FFmpeg concat with multiple inputs |
+| Speed ramp (slow-mo) | Easy | FFmpeg `setpts` filter |
+| Talking head crop/zoom | Hard | OpenCV face detection + crop |
+| Social media export presets | Easy | FFmpeg scale/pad for 9:16, 1:1 |
+| GPU acceleration | Medium | FFmpeg with `-c:v h264_nvenc` (Nvidia) |
+
+---
+
+*ClipForge — personal use only*
